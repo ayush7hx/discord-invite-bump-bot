@@ -2,6 +2,10 @@ import discord
 from discord.ext import commands, tasks
 import os
 import asyncio
+import aiohttp
+import time
+import random
+import string
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -18,22 +22,89 @@ invite_cache = {}
 last_bump_times = {}
 
 BUMP_BOTS = {
-    "Disboard": {
-        "cmd": "/bump",
+    "302050872383242240": {
+        "name": "Disboard",
         "cooldown_h": 2,
         "keywords": ["bump done", "bumped", "server bumped"],
     },
-    "Carl-bot": {
-        "cmd": "/bump",
+    "235148962103951360": {
+        "name": "Carl-bot",
         "cooldown_h": 24,
         "keywords": ["bumped", "bump", "carl.gg"],
     },
-    "Discadia": {
-        "cmd": "/bump",
+    "1222548162741084311": {
+        "name": "Discadia",
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful"],
     },
 }
+
+
+def get_user_token():
+    """USER_TOKEN fetch karo."""
+    token = os.getenv('USER_TOKEN', '').strip().strip('"').strip("'")
+    return token if token else None
+
+
+def make_nonce():
+    ts = int(time.time() * 1000)
+    return str((ts << 22) + random.randint(0, 4194303))
+
+
+def make_session_id():
+    return ''.join(random.choices(string.hexdigits.lower(), k=32))
+
+
+async def trigger_slash_command(channel: discord.TextChannel, bot_id: str, cmd_name: str = "bump") -> bool:
+    """Slash command trigger karo API ke through."""
+    user_token = get_user_token()
+    if not user_token:
+        print(f"[SlashCmd] ❌ USER_TOKEN not set!")
+        return False
+    
+    url = "https://discord.com/api/v9/interactions"
+    
+    payload = {
+        "type": 2,
+        "application_id": bot_id,
+        "guild_id": str(channel.guild.id),
+        "channel_id": str(channel.id),
+        "session_id": make_session_id(),
+        "data": {
+            "version": "1",
+            "id": "1",
+            "name": cmd_name,
+            "type": 1,
+            "options": [],
+        },
+        "nonce": make_nonce()
+    }
+    
+    headers = {
+        "Authorization": user_token,
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    }
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                status = resp.status
+                if status in (200, 204):
+                    print(f"[SlashCmd] ✅ Slash command triggered (HTTP {status})")
+                    return True
+                else:
+                    text = await resp.text()
+                    print(f"[SlashCmd] ❌ Failed (HTTP {status}): {text[:200]}")
+                    if status == 401:
+                        print(f"[SlashCmd] 🔑 Invalid USER_TOKEN!")
+                    return False
+    except asyncio.TimeoutError:
+        print(f"[SlashCmd] ⏱️ Timeout")
+        return False
+    except Exception as e:
+        print(f"[SlashCmd] ❌ Error: {e}")
+        return False
 
 
 def get_bump_channel(guild):
@@ -50,7 +121,7 @@ def get_bump_channel(guild):
 
 
 async def run_all_bumps():
-    """Main auto bump engine - text commands use karo."""
+    """Main auto bump engine - API through slash commands."""
     for guild in bot.guilds:
         print(f"\n[AutoBump] Processing: {guild.name}")
         
@@ -62,45 +133,54 @@ async def run_all_bumps():
         now = datetime.now(datetime.timezone.utc)
         
         # Disboard bump
+        print(f"[AutoBump] Checking Disboard...")
         if now - last_bump_times.get("Disboard", datetime.min) >= timedelta(hours=2):
             print(f"[AutoBump] 🚀 Triggering Disboard...")
-            try:
-                await channel.send("/bump")
+            success = await trigger_slash_command(channel, "302050872383242240", "bump")
+            if success:
                 last_bump_times["Disboard"] = now
-                print(f"[AutoBump] ✅ Disboard command sent")
-            except Exception as e:
-                print(f"[AutoBump] ❌ Disboard error: {e}")
-            await asyncio.sleep(3)
+                await channel.send("✅ **Disboard bump triggered!**")
+                print(f"[AutoBump] ✅ Disboard bumped")
+            else:
+                await channel.send("⚠️ **Disboard bump failed!**")
+                print(f"[AutoBump] ❌ Disboard bump failed")
+            await asyncio.sleep(4)
         else:
             remaining = timedelta(hours=2) - (now - last_bump_times.get("Disboard", datetime.min))
             mins = int(remaining.total_seconds() // 60)
             print(f"[AutoBump] ⏳ Disboard cooldown: {mins}m remaining")
         
         # Carl-bot bump
+        print(f"[AutoBump] Checking Carl-bot...")
         if now - last_bump_times.get("Carl-bot", datetime.min) >= timedelta(hours=24):
             print(f"[AutoBump] 🚀 Triggering Carl-bot...")
-            try:
-                await channel.send("/bump")
+            success = await trigger_slash_command(channel, "235148962103951360", "bump")
+            if success:
                 last_bump_times["Carl-bot"] = now
-                print(f"[AutoBump] ✅ Carl-bot command sent")
-            except Exception as e:
-                print(f"[AutoBump] ❌ Carl-bot error: {e}")
-            await asyncio.sleep(3)
+                await channel.send("✅ **Carl-bot bump triggered!**")
+                print(f"[AutoBump] ✅ Carl-bot bumped")
+            else:
+                await channel.send("⚠️ **Carl-bot bump failed!**")
+                print(f"[AutoBump] ❌ Carl-bot bump failed")
+            await asyncio.sleep(4)
         else:
             remaining = timedelta(hours=24) - (now - last_bump_times.get("Carl-bot", datetime.min))
             hours = int(remaining.total_seconds() // 3600)
             print(f"[AutoBump] ⏳ Carl-bot cooldown: {hours}h remaining")
         
         # Discadia bump
+        print(f"[AutoBump] Checking Discadia...")
         if now - last_bump_times.get("Discadia", datetime.min) >= timedelta(hours=1):
             print(f"[AutoBump] 🚀 Triggering Discadia...")
-            try:
-                await channel.send("/bump")
+            success = await trigger_slash_command(channel, "1222548162741084311", "bump")
+            if success:
                 last_bump_times["Discadia"] = now
-                print(f"[AutoBump] ✅ Discadia command sent")
-            except Exception as e:
-                print(f"[AutoBump] ❌ Discadia error: {e}")
-            await asyncio.sleep(3)
+                await channel.send("✅ **Discadia bump triggered!**")
+                print(f"[AutoBump] ✅ Discadia bumped")
+            else:
+                await channel.send("⚠️ **Discadia bump failed!**")
+                print(f"[AutoBump] ❌ Discadia bump failed")
+            await asyncio.sleep(4)
         else:
             remaining = timedelta(hours=1) - (now - last_bump_times.get("Discadia", datetime.min))
             secs = int(remaining.total_seconds())
@@ -159,6 +239,12 @@ async def on_message(message):
 async def on_ready():
     """Bot ready."""
     print(f'\n✅ {bot.user} is online!')
+    
+    ut = get_user_token()
+    if ut:
+        print(f'🔑 USER_TOKEN is SET')
+    else:
+        print(f'❌ WARNING: USER_TOKEN NOT SET - bumps will fail!')
     
     await bot.change_presence(
         status=discord.Status.idle,
