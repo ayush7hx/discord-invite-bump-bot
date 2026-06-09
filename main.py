@@ -551,8 +551,36 @@ async def list_bump_bots(ctx):
     await ctx.send(embed=embed)
 
 
-token = os.getenv('DISCORD_TOKEN')
-if not token:
-    print('❌ ERROR: DISCORD_TOKEN not set in .env file!')
-else:
-    bot.run(token)
+# ─────────────────────────────────────────────
+#  HEALTH CHECK SERVER (Render Web Service ke liye)
+#  Bot ke saath ek simple HTTP server chalata hai
+#  Render ko port milta hai, bot kaam karta hai
+# ─────────────────────────────────────────────
+from aiohttp import web as aio_web
+
+async def health(request):
+    return aio_web.Response(text="✅ Bot is alive!")
+
+async def run_health_server():
+    app = aio_web.Application()
+    app.router.add_get("/", health)
+    app.router.add_get("/health", health)
+    runner = aio_web.AppRunner(app)
+    await runner.setup()
+    port = int(os.getenv("PORT", 8080))
+    site = aio_web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"✅ Health check server running on port {port}")
+
+
+async def main():
+    token = os.getenv('DISCORD_TOKEN')
+    if not token:
+        print('❌ ERROR: DISCORD_TOKEN not set in environment variables!')
+        return
+    await run_health_server()
+    await bot.start(token)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
