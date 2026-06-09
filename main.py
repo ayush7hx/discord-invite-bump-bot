@@ -29,7 +29,7 @@ last_bump_times = {}
 #  keywords    -> bump confirm hone ke baad jo message aata hai usme ye words
 # ─────────────────────────────────────────────
 BUMP_BOTS = {
-    # Disboard — /bump — 2h cooldown
+    # ── Disboard — /bump — 2h cooldown ──────────────────
     "302050872383242240": {
         "name": "Disboard",
         "cmd_name": "bump",
@@ -37,7 +37,7 @@ BUMP_BOTS = {
         "keywords": ["bump done", "bumped", "server bumped"],
         "bot_int_id": 302050872383242240,
     },
-    # Discadia — /bump — 1h cooldown
+    # ── Discadia — /bump — 1h cooldown ──────────────────
     "1222548162741084311": {
         "name": "Discadia",
         "cmd_name": "bump",
@@ -45,7 +45,15 @@ BUMP_BOTS = {
         "keywords": ["bumped", "bump successful", "server has been bumped"],
         "bot_int_id": 1222548162741084311,
     },
-    # Infinity Bot List — /bump — 1h cooldown
+    # ── top.gg — /bump — 12h cooldown ───────────────────
+    "264811613708746752": {
+        "name": "top.gg",
+        "cmd_name": "bump",
+        "cooldown_h": 12,
+        "keywords": ["bumped", "bump", "voted"],
+        "bot_int_id": 264811613708746752,
+    },
+    # ── Infinity Bot List — /bump — 1h cooldown ──────────
     "716948396455108649": {
         "name": "InfinityBots",
         "cmd_name": "bump",
@@ -53,7 +61,7 @@ BUMP_BOTS = {
         "keywords": ["bumped", "bump successful"],
         "bot_int_id": 716948396455108649,
     },
-    # Void Bots — /bump — 1h cooldown
+    # ── Void Bots — /bump — 1h cooldown ─────────────────
     "891226286347366410": {
         "name": "VoidBots",
         "cmd_name": "bump",
@@ -61,7 +69,7 @@ BUMP_BOTS = {
         "keywords": ["bumped", "bump"],
         "bot_int_id": 891226286347366410,
     },
-    # Discord Bot List — /bump — 2h cooldown
+    # ── Discord Bot List — /bump — 2h cooldown ───────────
     "483344858939383808": {
         "name": "DiscordBotList",
         "cmd_name": "bump",
@@ -69,13 +77,61 @@ BUMP_BOTS = {
         "keywords": ["bumped", "bump"],
         "bot_int_id": 483344858939383808,
     },
-    # Discord.bots.gg — /bump — 6h cooldown
+    # ── Discord.bots.gg — /bump — 6h cooldown ────────────
     "387774921943678977": {
         "name": "Discord.bots.gg",
         "cmd_name": "bump",
         "cooldown_h": 6,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 387774921943678977,
+    },
+    # ── Discords.com — /bump — 2h cooldown ───────────────
+    "1000744996328022076": {
+        "name": "Discords.com",
+        "cmd_name": "bump",
+        "cooldown_h": 2,
+        "keywords": ["bumped", "bump"],
+        "bot_int_id": 1000744996328022076,
+    },
+    # ── Discord Services — /bump — 2h cooldown ────────────
+    "715652345503596595": {
+        "name": "DiscordServices",
+        "cmd_name": "bump",
+        "cooldown_h": 2,
+        "keywords": ["bumped", "bump"],
+        "bot_int_id": 715652345503596595,
+    },
+    # ── Disforge — /bump — 4h cooldown ───────────────────
+    "1049617674042007612": {
+        "name": "Disforge",
+        "cmd_name": "bump",
+        "cooldown_h": 4,
+        "keywords": ["bumped", "bump"],
+        "bot_int_id": 1049617674042007612,
+    },
+    # ── BotList.me — /bump — 2h cooldown ─────────────────
+    "1042166164868968458": {
+        "name": "BotList.me",
+        "cmd_name": "bump",
+        "cooldown_h": 2,
+        "keywords": ["bumped", "bump"],
+        "bot_int_id": 1042166164868968458,
+    },
+    # ── Discord Center — /bump — 2h cooldown ─────────────
+    "507937324942917634": {
+        "name": "DiscordCenter",
+        "cmd_name": "bump",
+        "cooldown_h": 2,
+        "keywords": ["bumped", "bump"],
+        "bot_int_id": 507937324942917634,
+    },
+    # ── DISBOARD Alternatives — Discordlist.gg ────────────
+    "846471508198170624": {
+        "name": "Discordlist.gg",
+        "cmd_name": "bump",
+        "cooldown_h": 2,
+        "keywords": ["bumped", "bump"],
+        "bot_int_id": 846471508198170624,
     },
 }
 
