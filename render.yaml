@@ -1,0 +1,15 @@
+services:
+  - type: worker
+    name: discord-invite-bump-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: INVITE_CHANNEL_ID
+        sync: false
+      - key: BUMP_CHANNEL_ID
+        sync: false
+      - key: BUMP_ROLE_ID
+        sync: false
