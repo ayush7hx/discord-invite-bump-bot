@@ -23,135 +23,124 @@ last_bump_times = {}
 
 # ─────────────────────────────────────────────
 #  ALL SUPPORTED BUMP BOTS
-#  app_id      -> bot ki pehchaan
-#  cmd_name    -> slash command ka naam
-#  cooldown_h  -> kitne ghante baad dobara bump hoga
-#  keywords    -> bump confirm hone ke baad jo message aata hai usme ye words
 # ─────────────────────────────────────────────
 BUMP_BOTS = {
-    # cmd_id = known global slash command ID for /bump
-    # ── Disboard — /bump — 2h cooldown ──────────────────
     "302050872383242240": {
         "name": "Disboard",
         "cmd_name": "bump",
-        "cmd_id": "947088344167366698",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bump done", "bumped", "server bumped"],
         "bot_int_id": 302050872383242240,
     },
-    # ── Discadia — /bump — 1h cooldown ──────────────────
     "1222548162741084311": {
         "name": "Discadia",
         "cmd_name": "bump",
-        "cmd_id": "1222548162741084312",
+        "cmd_id": None,
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful", "server has been bumped"],
         "bot_int_id": 1222548162741084311,
     },
-    # ── top.gg — /bump — 12h cooldown ───────────────────
     "264811613708746752": {
         "name": "top.gg",
         "cmd_name": "bump",
-        "cmd_id": "264811613708746753",
+        "cmd_id": None,
         "cooldown_h": 12,
         "keywords": ["bumped", "bump", "voted"],
         "bot_int_id": 264811613708746752,
     },
-    # ── Infinity Bot List — /bump — 1h cooldown ──────────
     "716948396455108649": {
         "name": "InfinityBots",
         "cmd_name": "bump",
-        "cmd_id": "716948396455108650",
+        "cmd_id": None,
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful"],
         "bot_int_id": 716948396455108649,
     },
-    # ── Void Bots — /bump — 1h cooldown ─────────────────
     "891226286347366410": {
         "name": "VoidBots",
         "cmd_name": "bump",
-        "cmd_id": "891226286347366411",
+        "cmd_id": None,
         "cooldown_h": 1,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 891226286347366410,
     },
-    # ── Discord Bot List — /bump — 2h cooldown ───────────
     "483344858939383808": {
         "name": "DiscordBotList",
         "cmd_name": "bump",
-        "cmd_id": "483344858939383809",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 483344858939383808,
     },
-    # ── Discord.bots.gg — /bump — 6h cooldown ────────────
     "387774921943678977": {
         "name": "Discord.bots.gg",
         "cmd_name": "bump",
-        "cmd_id": "387774921943678978",
+        "cmd_id": None,
         "cooldown_h": 6,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 387774921943678977,
     },
-    # ── Discords.com (DS.ME) — /bump — 2h cooldown ───────
     "1000744996328022076": {
         "name": "Discords.com",
         "cmd_name": "bump",
-        "cmd_id": "1000744996328022077",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1000744996328022076,
     },
-    # ── Discord Services — /bump — 2h cooldown ────────────
     "715652345503596595": {
         "name": "DiscordServices",
         "cmd_name": "bump",
-        "cmd_id": "715652345503596596",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 715652345503596595,
     },
-    # ── Disforge — /bump — 4h cooldown ───────────────────
     "1049617674042007612": {
         "name": "Disforge",
         "cmd_name": "bump",
-        "cmd_id": "1049617674042007613",
+        "cmd_id": None,
         "cooldown_h": 4,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1049617674042007612,
     },
-    # ── BotList.me — /bump — 2h cooldown ─────────────────
     "1042166164868968458": {
         "name": "BotList.me",
         "cmd_name": "bump",
-        "cmd_id": "1042166164868968459",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1042166164868968458,
     },
-    # ── Discord Center — /bump — 2h cooldown ─────────────
     "507937324942917634": {
         "name": "DiscordCenter",
         "cmd_name": "bump",
-        "cmd_id": "507937324942917635",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 507937324942917634,
     },
-    # ── Discordlist.gg — /bump — 2h cooldown ─────────────
     "846471508198170624": {
         "name": "Discordlist.gg",
         "cmd_name": "bump",
-        "cmd_id": "846471508198170625",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 846471508198170624,
     },
+    "235148962103951360": {
+        "name": "Carl-bot",
+        "cmd_name": "bump",
+        "cmd_id": None,
+        "cooldown_h": 24,
+        "keywords": ["bumped", "bump", "carl.gg"],
+        "bot_int_id": 235148962103951360,
+    },
 }
 
-# Guild mein available bump bot commands cache
-# { guild_id: { app_id_str: { cmd_id, cmd_version } } }
 guild_cmd_cache = {}
+cmd_id_cache = {}  # Cache for fetched command IDs
 
 
 def make_nonce():
@@ -163,52 +152,107 @@ def make_session_id():
     return ''.join(random.choices(string.hexdigits.lower(), k=32))
 
 
-# ─────────────────────────────────────────────
-#  STEP 1: Guild ke saare slash commands fetch karo
-#  Yahan se pata chalega kaunse bump bots installed hain
-# ─────────────────────────────────────────────
-async def fetch_guild_bump_commands(guild: discord.Guild):
-    """
-    Guild ke members mein check karo kaunse bump bots hain.
-    Jo bhi known bump bot server mein milega, uska hardcoded cmd_id use hoga.
-    """
-    found = {}
+def get_user_token():
+    """USER_TOKEN fetch karo."""
+    token = os.getenv('USER_TOKEN', '').strip().strip('"').strip("'")
+    if not token:
+        return None
+    return token
 
+
+def get_browser_headers(token: str) -> dict:
+    return {
+        "Authorization": token,
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "X-Discord-Locale": "en-US",
+        "X-Discord-Timezone": "Asia/Kolkata",
+    }
+
+
+async def fetch_cmd_id_from_api(guild_id: int, app_id: str, cmd_name: str) -> str | None:
+    """Discord API se command ID fetch karo."""
+    # Check cache first
+    cache_key = f"{guild_id}_{app_id}_{cmd_name}"
+    if cache_key in cmd_id_cache:
+        print(f"[CmdFetch] 💾 Using cached cmd_id for {cmd_name}")
+        return cmd_id_cache[cache_key]
+    
+    user_token = get_user_token()
+    if not user_token:
+        print(f"[CmdFetch] ❌ USER_TOKEN not set!")
+        return None
+    
+    url = f"https://discord.com/api/v9/guilds/{guild_id}/application-command-index"
+    headers = get_browser_headers(user_token)
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    print(f"[CmdFetch] ❌ API returned {resp.status}")
+                    return None
+                
+                data = await resp.json()
+                all_cmds = data.get("application_commands", []) or data.get("commands", []) or []
+                
+                for cmd in all_cmds:
+                    if (str(cmd.get("application_id")) == app_id and cmd.get("name") == cmd_name):
+                        cmd_id = str(cmd["id"])
+                        cmd_id_cache[cache_key] = cmd_id  # Cache it
+                        print(f"[CmdFetch] ✅ Found cmd_id={cmd_id} for {cmd_name}")
+                        return cmd_id
+                
+                print(f"[CmdFetch] ⚠️ Command {cmd_name} for app {app_id} not found")
+    except asyncio.TimeoutError:
+        print(f"[CmdFetch] ⏱️ Timeout fetching cmd_id")
+    except Exception as e:
+        print(f"[CmdFetch] ❌ Error: {e}")
+    
+    return None
+
+
+async def fetch_guild_bump_commands(guild: discord.Guild):
+    """Guild mein available bump bots detect karo."""
+    found = {}
+    
     for app_id, bot_info in BUMP_BOTS.items():
-        # Check if this bump bot is a member of the guild
         member = guild.get_member(bot_info["bot_int_id"])
         if member is not None:
             cmd_id = bot_info["cmd_id"]
+            
+            # Agar cmd_id None hai, dynamically fetch karo
+            if cmd_id is None:
+                print(f"[BotDetect] 🔍 Fetching cmd_id for {bot_info['name']}...")
+                cmd_id = await fetch_cmd_id_from_api(guild.id, app_id, bot_info["cmd_name"])
+                if cmd_id is None:
+                    print(f"[BotDetect] ⚠️ Skip: Could not get cmd_id for {bot_info['name']}")
+                    continue
+            
             found[app_id] = {
                 "cmd_id": cmd_id,
                 "cmd_version": cmd_id,
                 "cmd_name": bot_info["cmd_name"],
-                "description": f"Bump your server on {bot_info['name']}!",
+                "description": f"Bump on {bot_info['name']}!",
             }
-            print(f"[BotDetect] ✅ Found {bot_info['name']} in '{guild.name}'")
-        else:
-            print(f"[BotDetect] ❌ {bot_info['name']} not in '{guild.name}'")
-
+            print(f"[BotDetect] ✅ {bot_info['name']} ready (cmd_id={cmd_id})")
+    
     return found
 
 
-# ─────────────────────────────────────────────
-#  STEP 2: Slash command trigger karo via HTTP
-# ─────────────────────────────────────────────
 async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
-                              app_id: str, cmd_info: dict) -> bool:
-    # USER_TOKEN zaruri hai slash commands trigger karne ke liye
-    user_token = os.getenv('USER_TOKEN')
+                             app_id: str, cmd_info: dict) -> bool:
+    """Slash command trigger karo."""
+    user_token = get_user_token()
     if not user_token:
-        print(f"[SlashBump] ❌ USER_TOKEN not set! Cannot trigger slash commands.")
+        print(f"[SlashBump] ❌ USER_TOKEN not set!")
         return False
-
-    url = "https://discord.com/api/v10/interactions"
+    
+    url = "https://discord.com/api/v9/interactions"
     cmd_id = cmd_info["cmd_id"]
     cmd_version = cmd_info["cmd_version"]
     cmd_name = cmd_info["cmd_name"]
-    description = cmd_info.get("description", "Bump your server!")
-
+    
     payload = {
         "type": 2,
         "application_id": app_id,
@@ -229,7 +273,7 @@ async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
                 "type": 1,
                 "nsfw": False,
                 "name": cmd_name,
-                "description": description,
+                "description": "Bump!",
                 "dm_permission": True,
                 "options": []
             },
@@ -237,41 +281,50 @@ async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
         },
         "nonce": make_nonce()
     }
-
-    headers = {
-        "Authorization": user_token,  # User token (no "Bot " prefix)
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "X-Discord-Locale": "en-US",
-        "X-Discord-Timezone": "Asia/Kolkata",
-    }
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=payload, headers=headers) as resp:
-            status = resp.status
-            text = await resp.text()
-            print(f"[SlashBump] {BUMP_BOTS[app_id]['name']} -> HTTP {status}")
-            return status in (200, 204)
-
-
-async def do_text_bump(channel: discord.TextChannel, command: str):
+    
+    headers = get_browser_headers(user_token)
+    
     try:
-        await channel.send(command)
-        print(f"[TextBump] Sent '{command}' to #{channel.name}")
-        return True
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                status = resp.status
+                
+                if status in (200, 204):
+                    print(f"[SlashBump] ✅ {BUMP_BOTS[app_id]['name']} triggered successfully")
+                    return True
+                else:
+                    text = await resp.text()
+                    print(f"[SlashBump] ❌ {BUMP_BOTS[app_id]['name']} failed (HTTP {status})")
+                    if status == 401:
+                        print(f"[SlashBump] 🔑 Unauthorized - Check USER_TOKEN!")
+                    elif status == 403:
+                        print(f"[SlashBump] 🚫 Forbidden - Missing permissions!")
+                    return False
+    except asyncio.TimeoutError:
+        print(f"[SlashBump] ⏱️ Timeout: {BUMP_BOTS[app_id]['name']}")
+        return False
     except Exception as e:
-        print(f"[TextBump] Error: {e}")
+        print(f"[SlashBump] ❌ Error: {e}")
         return False
 
 
-# ─────────────────────────────────────────────
-#  MAIN AUTO BUMP ENGINE
-# ─────────────────────────────────────────────
+async def do_text_bump(channel: discord.TextChannel, command: str):
+    """Text-based bump command."""
+    try:
+        await channel.send(command)
+        print(f"[TextBump] ✅ Sent '{command}' to #{channel.name}")
+        return True
+    except Exception as e:
+        print(f"[TextBump] ❌ Error: {e}")
+        return False
+
+
 async def run_all_bumps():
+    """Main auto bump engine."""
     bump_channel_id = int(os.getenv('BUMP_CHANNEL_ID', 0))
     text_commands_raw = os.getenv('BUMP_TEXT_COMMANDS', '')
     text_commands = [c.strip() for c in text_commands_raw.split(',') if c.strip()]
-
+    
     for guild in bot.guilds:
         # Bump channel dhundho
         channel = guild.get_channel(bump_channel_id)
@@ -280,52 +333,60 @@ async def run_all_bumps():
                 if 'bump' in ch.name.lower():
                     channel = ch
                     break
-
+        
         if not channel:
-            print(f"[AutoBump] No bump channel found in '{guild.name}', skipping.")
+            print(f"[AutoBump] ⚠️ No bump channel in '{guild.name}'")
             continue
-
+        
         now = datetime.utcnow()
-
-        # Guild ke commands fetch karo (cache karo taaki baar baar na karein)
+        
+        # Guild ke commands fetch karo
         if guild.id not in guild_cmd_cache:
+            print(f"[AutoBump] 🔄 Refreshing commands for {guild.name}...")
             guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild)
-
+        
         available_cmds = guild_cmd_cache[guild.id]
-
+        
         if not available_cmds:
-            print(f"[AutoBump] No supported bump bots found in '{guild.name}'")
-        else:
-            print(f"[AutoBump] Found {len(available_cmds)} bump bot(s) in '{guild.name}'")
-
-        # ── Saare slash bump bots run karo ───────────────
+            print(f"[AutoBump] ⚠️ No bump bots found in '{guild.name}'")
+            continue
+        
+        print(f"[AutoBump] 📊 {len(available_cmds)} bot(s) in '{guild.name}'")
+        
+        # Saare slash bump bots run karo
         for app_id, cmd_info in available_cmds.items():
             bot_info = BUMP_BOTS[app_id]
             bot_name = bot_info["name"]
             cooldown_h = bot_info["cooldown_h"]
-
+            
             last_t = last_bump_times.get(bot_name)
             cooldown_ok = (last_t is None or now - last_t >= timedelta(hours=cooldown_h))
-
+            
             if cooldown_ok:
-                print(f"[AutoBump] Triggering {bot_name} /{cmd_info['cmd_name']}...")
+                print(f"[AutoBump] 🚀 Triggering {bot_name}...")
                 success = await trigger_slash_bump(guild, channel, app_id, cmd_info)
                 if success:
                     last_bump_times[bot_name] = now
-                    await channel.send(
-                        f"🚀 **Auto Bumped!** Server bumped on **{bot_name}**!"
+                    embed = discord.Embed(
+                        title="✅ Auto Bump Successful!",
+                        description=f"Server bumped on **{bot_name}**",
+                        color=0x57F287
                     )
+                    await channel.send(embed=embed)
                 else:
-                    await channel.send(
-                        f"⚠️ **{bot_name}** auto-bump failed. Try manually!"
+                    embed = discord.Embed(
+                        title="⚠️ Auto Bump Failed!",
+                        description=f"**{bot_name}** failed. Try manually!",
+                        color=0xED4245
                     )
-                await asyncio.sleep(4)  # Bots ke beech thoda wait
+                    await channel.send(embed=embed)
+                await asyncio.sleep(4)
             else:
                 remaining = timedelta(hours=cooldown_h) - (now - last_t)
                 mins = int(remaining.total_seconds() // 60)
-                print(f"[AutoBump] {bot_name} cooldown: {mins}m remaining.")
-
-        # ── Text-based bump commands ─────────────────────
+                print(f"[AutoBump] ⏳ {bot_name}: {mins}m cooldown remaining")
+        
+        # Text-based bump commands
         for cmd in text_commands:
             cmd_key = f"text_{cmd}"
             last_t = last_bump_times.get(cmd_key)
@@ -336,55 +397,67 @@ async def run_all_bumps():
                 await asyncio.sleep(3)
 
 
-# ─────────────────────────────────────────────
-#  SCHEDULED TASK
-# ─────────────────────────────────────────────
 @tasks.loop(minutes=30)
 async def auto_bump_task():
-    print(f"[AutoBump] Tick at {datetime.utcnow().strftime('%H:%M:%S UTC')}")
+    """Every 30 minutes auto bump."""
+    print(f"\n[AutoBump] ⏰ Task tick at {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     await run_all_bumps()
 
 
 @auto_bump_task.before_loop
 async def before_auto_bump():
+    """Setup before auto bump."""
     await bot.wait_until_ready()
     await asyncio.sleep(5)
-    # Startup par command cache refresh karo
+    print("[AutoBump] 🔄 Initial setup...")
     for guild in bot.guilds:
         guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild)
     await run_all_bumps()
 
 
-# ─────────────────────────────────────────────
-#  BUMP DETECTION — jab bump bot confirm kare
-# ─────────────────────────────────────────────
 @bot.event
 async def on_message(message):
-    # Check if it's a known bump bot responding
+    """Detect bump bot confirmations."""
+    # Ignore bot's own messages
+    if message.author == bot.user:
+        return
+    
     for app_id, bot_info in BUMP_BOTS.items():
         if message.author.id == bot_info["bot_int_id"]:
             content_to_check = message.content.lower()
+            
+            # Check embeds too
             if message.embeds:
                 for emb in message.embeds:
-                    content_to_check += (emb.description or '').lower()
-                    content_to_check += (emb.title or '').lower()
-
+                    if emb.description:
+                        content_to_check += emb.description.lower()
+                    if emb.title:
+                        content_to_check += emb.title.lower()
+            
+            # Check for keywords
             for kw in bot_info["keywords"]:
                 if kw in content_to_check:
                     last_bump_times[bot_info["name"]] = datetime.utcnow()
-                    print(f"[BumpDetect] {bot_info['name']} bump confirmed!")
+                    print(f"[BumpDetect] ✅ {bot_info['name']} bump confirmed!")
                     break
-
+    
     await bot.process_commands(message)
 
 
-# ─────────────────────────────────────────────
-#  INVITE TRACKER
-# ─────────────────────────────────────────────
 @bot.event
 async def on_ready():
-    print(f'✅ {bot.user} is now online!')
-
+    """Bot ready."""
+    print(f'\n✅ {bot.user} is online!')
+    
+    # Check USER_TOKEN
+    ut = get_user_token()
+    if ut:
+        masked = ut[:20] + "..." if len(ut) > 20 else ut
+        print(f'🔑 USER_TOKEN set: {masked}')
+    else:
+        print(f'❌ USER_TOKEN NOT SET - Auto bump will fail!')
+    
+    # Set presence
     await bot.change_presence(
         status=discord.Status.idle,
         activity=discord.Activity(
@@ -392,21 +465,24 @@ async def on_ready():
             name="the server 🌙"
         )
     )
-
+    
+    # Cache invites
     for guild in bot.guilds:
         try:
             invites = await guild.fetch_invites()
             invite_cache[guild.id] = {inv.code: inv for inv in invites}
-            print(f'Cached {len(invites)} invites for: {guild.name}')
+            print(f'📌 Cached {len(invites)} invites for: {guild.name}')
         except Exception as e:
-            print(f'Could not cache invites for {guild.name}: {e}')
-
+            print(f'⚠️ Could not cache invites for {guild.name}: {e}')
+    
+    # Start auto bump task
     auto_bump_task.start()
-    print('🔄 Auto bump task started!')
+    print('🔄 Auto bump task started (runs every 30 min)!\n')
 
 
 @bot.event
 async def on_invite_create(invite):
+    """Track invite creation."""
     guild_id = invite.guild.id
     if guild_id not in invite_cache:
         invite_cache[guild_id] = {}
@@ -415,6 +491,7 @@ async def on_invite_create(invite):
 
 @bot.event
 async def on_invite_delete(invite):
+    """Track invite deletion."""
     guild_id = invite.guild.id
     if guild_id in invite_cache and invite.code in invite_cache[guild_id]:
         del invite_cache[guild_id][invite.code]
@@ -422,15 +499,16 @@ async def on_invite_delete(invite):
 
 @bot.event
 async def on_member_join(member):
+    """Track who invited the member."""
     guild = member.guild
     inviter = None
     invite_count = 0
-
+    
     try:
         new_invites = await guild.fetch_invites()
         new_invite_map = {inv.code: inv for inv in new_invites}
         old_invites = invite_cache.get(guild.id, {})
-
+        
         for code, new_inv in new_invite_map.items():
             old_inv = old_invites.get(code)
             if old_inv is None or new_inv.uses > old_inv.uses:
@@ -438,44 +516,42 @@ async def on_member_join(member):
                     inviter = new_inv.inviter
                     invite_count = new_inv.uses
                 break
-
+        
         invite_cache[guild.id] = new_invite_map
     except Exception as e:
-        print(f'Invite tracking error: {e}')
-
+        print(f'⚠️ Invite tracking error: {e}')
+    
     invite_channel_id = int(os.getenv('INVITE_CHANNEL_ID', 0))
     channel = guild.get_channel(invite_channel_id)
-
+    
     if not channel:
-        print('INVITE_CHANNEL_ID not set or channel not found!')
         return
-
+    
     if inviter:
-        msg = (
-            f'{member.mention} has joined **{guild.name}**, '
-            f'invited by user **{inviter}**, '
-            f'who has now **{invite_count}** invites'
+        embed = discord.Embed(
+            title="👋 New Member!",
+            description=f"{member.mention} joined",
+            color=0x5865F2
         )
+        embed.add_field(name="Invited by", value=f"{inviter.mention}", inline=False)
+        embed.add_field(name="Total Invites", value=f"{invite_count}", inline=False)
+        await channel.send(embed=embed)
     else:
-        msg = (
-            f'{member.mention} has joined **{guild.name}**, '
-            f'invite link could not be determined'
-        )
-
-    await channel.send(msg)
+        await channel.send(f"{member.mention} joined (invite source unknown)")
 
 
-# ─────────────────────────────────────────────
-#  COMMANDS
-# ─────────────────────────────────────────────
+# ──── COMMANDS ────
+
 @bot.command(name='invites')
 async def check_invites(ctx, member: discord.Member = None):
+    """Check total invites by a member."""
     if member is None:
         member = ctx.author
-    guild = ctx.guild
+    
     try:
-        invites = await guild.fetch_invites()
+        invites = await ctx.guild.fetch_invites()
         total = sum(inv.uses for inv in invites if inv.inviter and inv.inviter.id == member.id)
+        
         embed = discord.Embed(
             title='📊 Invite Stats',
             description=f'{member.mention} has **{total}** invite(s)',
@@ -488,67 +564,95 @@ async def check_invites(ctx, member: discord.Member = None):
 
 @bot.command(name='bumpstatus')
 async def bump_status(ctx):
+    """Check auto bump status."""
     now = datetime.utcnow()
     lines = []
-
+    
     available = guild_cmd_cache.get(ctx.guild.id, {})
+    
+    if not available:
+        await ctx.send("⏳ Loading bump bots... Try again in a moment!")
+        return
+    
     for app_id, cmd_info in available.items():
         bot_info = BUMP_BOTS[app_id]
         name = bot_info["name"]
         cooldown_h = bot_info["cooldown_h"]
         last_t = last_bump_times.get(name)
-
+        
         if last_t is None:
-            lines.append(f'✅ **{name}** — Ready to bump!')
+            lines.append(f'✅ **{name}** — Ready to bump! (cooldown: {cooldown_h}h)')
         else:
             remaining = timedelta(hours=cooldown_h) - (now - last_t)
             if remaining.total_seconds() <= 0:
-                lines.append(f'✅ **{name}** — Ready to bump!')
+                lines.append(f'✅ **{name}** — Ready to bump! (cooldown: {cooldown_h}h)')
             else:
                 mins = int(remaining.total_seconds() // 60)
-                lines.append(f'⏳ **{name}** — {mins}m remaining (cooldown: {cooldown_h}h)')
-
-    if not lines:
-        lines = ['⏳ Loading bump bots... Try again in a moment!']
-
+                secs = int(remaining.total_seconds() % 60)
+                lines.append(f'⏳ **{name}** — {mins}m {secs}s remaining')
+    
     embed = discord.Embed(
         title='🚀 Auto Bump Status',
-        description='\n'.join(lines),
+        description='\n'.join(lines) if lines else "No bump bots available",
         color=0x5865F2,
         timestamp=now
     )
-    embed.set_footer(text='Bot auto-bumps every 2h per platform')
+    embed.set_footer(text='Auto-bumps every 30 minutes')
     await ctx.send(embed=embed)
 
 
 @bot.command(name='forcebump')
 @commands.has_permissions(administrator=True)
 async def force_bump(ctx):
-    await ctx.send('⚡ Force running all bumps now...')
+    """Force run all bumps immediately."""
+    embed = discord.Embed(
+        title="⚡ Force Bump",
+        description="Running all bumps now...",
+        color=0xFAA61A
+    )
+    msg = await ctx.send(embed=embed)
+    
+    # Clear cooldowns
     last_bump_times.clear()
-    # Refresh command cache too
+    
+    # Refresh command cache
     guild_cmd_cache[ctx.guild.id] = await fetch_guild_bump_commands(ctx.guild)
+    
+    # Run bumps
     await run_all_bumps()
-    await ctx.send('✅ Done!')
+    
+    embed = discord.Embed(
+        title="✅ Force Bump Complete",
+        description="All bumps have been triggered!",
+        color=0x57F287
+    )
+    await msg.edit(embed=embed)
 
 
 @bot.command(name='listbumpbots')
 async def list_bump_bots(ctx):
+    """List detected bump bots."""
     available = guild_cmd_cache.get(ctx.guild.id, {})
+    
     if not available:
-        # Try fetching now
         available = await fetch_guild_bump_commands(ctx.guild)
         guild_cmd_cache[ctx.guild.id] = available
-
+    
     if not available:
-        await ctx.send('❌ No supported bump bots found in this server.')
+        embed = discord.Embed(
+            title="❌ No Bump Bots",
+            description="No supported bump bots found in this server.",
+            color=0xED4245
+        )
+        await ctx.send(embed=embed)
         return
-
+    
     lines = []
     for app_id, cmd_info in available.items():
         info = BUMP_BOTS[app_id]
-        lines.append(f'✅ **{info["name"]}** — `/{cmd_info["cmd_name"]}` — cooldown: {info["cooldown_h"]}h')
-
+        cooldown = info["cooldown_h"]
+        lines.append(f'✅ **{info["name"]}** — cooldown: {cooldown}h')
+    
     embed = discord.Embed(
         title='🤖 Detected Bump Bots',
         description='\n'.join(lines),
@@ -557,11 +661,47 @@ async def list_bump_bots(ctx):
     await ctx.send(embed=embed)
 
 
-# ─────────────────────────────────────────────
-#  HEALTH CHECK SERVER (Render Web Service ke liye)
-#  Bot ke saath ek simple HTTP server chalata hai
-#  Render ko port milta hai, bot kaam karta hai
-# ─────────────────────────────────────────────
+@bot.command(name='refreshbumpbots')
+@commands.has_permissions(administrator=True)
+async def refresh_bump_bots(ctx):
+    """Refresh and re-detect bump bots."""
+    embed = discord.Embed(
+        title="🔄 Refreshing Bump Bots",
+        description="Please wait...",
+        color=0x5865F2
+    )
+    msg = await ctx.send(embed=embed)
+    
+    # Clear cache for this guild
+    if ctx.guild.id in guild_cmd_cache:
+        del guild_cmd_cache[ctx.guild.id]
+    
+    # Fetch fresh
+    available = await fetch_guild_bump_commands(ctx.guild)
+    guild_cmd_cache[ctx.guild.id] = available
+    
+    if not available:
+        embed = discord.Embed(
+            title="❌ No Bump Bots Found",
+            description="Could not detect any supported bump bots.",
+            color=0xED4245
+        )
+    else:
+        lines = []
+        for app_id, cmd_info in available.items():
+            info = BUMP_BOTS[app_id]
+            lines.append(f'✅ {info["name"]}')
+        
+        embed = discord.Embed(
+            title="✅ Bump Bots Refreshed",
+            description=f"Found {len(available)} bot(s):\n" + '\n'.join(lines),
+            color=0x57F287
+        )
+    
+    await msg.edit(embed=embed)
+
+
+# ──── HEALTH SERVER ────
 from aiohttp import web as aio_web
 
 async def health(request):
@@ -576,14 +716,15 @@ async def run_health_server():
     port = int(os.getenv("PORT", 8080))
     site = aio_web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
-    print(f"✅ Health check server running on port {port}")
+    print(f"✅ Health server running on port {port}\n")
 
 
 async def main():
     token = os.getenv('DISCORD_TOKEN')
     if not token:
-        print('❌ ERROR: DISCORD_TOKEN not set in environment variables!')
+        print('❌ ERROR: DISCORD_TOKEN not set!')
         return
+    
     await run_health_server()
     await bot.start(token)
 
