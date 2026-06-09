@@ -301,27 +301,19 @@ async def on_member_join(member):
         print(f'INVITE_CHANNEL_ID not set or channel not found!')
         return
 
-    embed = discord.Embed(color=0x2b2d31, timestamp=datetime.utcnow())
-    embed.set_author(
-        name=f'{member.name} joined the server!',
-        icon_url=member.display_avatar.url
-    )
-
     if inviter:
-        embed.description = (
-            f'👋 {member.mention} has joined **{guild.name}**\n'
-            f'📨 Invited by **{inviter.mention}** (`{inviter}`)\n'
-            f'🎯 They now have **{invite_count}** invite(s) total'
+        msg = (
+            f'{member.mention} has joined **{guild.name}**, '
+            f'invited by user **{inviter}**, '
+            f'who has now **{invite_count}** invites'
         )
     else:
-        embed.description = (
-            f'👋 {member.mention} has joined **{guild.name}**\n'
-            f'📨 Invite link could not be determined'
+        msg = (
+            f'{member.mention} has joined **{guild.name}**, '
+            f'invite link could not be determined'
         )
 
-    embed.set_thumbnail(url=member.display_avatar.url)
-    embed.set_footer(text=f'Member #{guild.member_count}')
-    await channel.send(embed=embed)
+    await channel.send(msg)
 
 
 # ─────────────────────────────────────────────
