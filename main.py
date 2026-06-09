@@ -197,9 +197,13 @@ async def fetch_guild_bump_commands(guild: discord.Guild):
 # ─────────────────────────────────────────────
 async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
                               app_id: str, cmd_info: dict) -> bool:
-    token = os.getenv('DISCORD_TOKEN')
-    url = "https://discord.com/api/v10/interactions"
+    # USER_TOKEN zaruri hai slash commands trigger karne ke liye
+    user_token = os.getenv('USER_TOKEN')
+    if not user_token:
+        print(f"[SlashBump] ❌ USER_TOKEN not set! Cannot trigger slash commands.")
+        return False
 
+    url = "https://discord.com/api/v10/interactions"
     cmd_id = cmd_info["cmd_id"]
     cmd_version = cmd_info["cmd_version"]
     cmd_name = cmd_info["cmd_name"]
@@ -235,9 +239,11 @@ async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
     }
 
     headers = {
-        "Authorization": f"Bot {token}",
+        "Authorization": user_token,  # User token (no "Bot " prefix)
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "X-Discord-Locale": "en-US",
+        "X-Discord-Timezone": "Asia/Kolkata",
     }
 
     async with aiohttp.ClientSession() as session:
