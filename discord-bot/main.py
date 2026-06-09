@@ -29,12 +29,12 @@ last_bump_times = {}
 #  keywords    -> bump confirm hone ke baad jo message aata hai usme ye words
 # ─────────────────────────────────────────────
 BUMP_BOTS = {
-    # cmd_id = known global slash command ID for /bump
+    # cmd_id = None means fetch dynamically from Discord API (recommended)
     # ── Disboard — /bump — 2h cooldown ──────────────────
     "302050872383242240": {
         "name": "Disboard",
         "cmd_name": "bump",
-        "cmd_id": "947088344167366698",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bump done", "bumped", "server bumped"],
         "bot_int_id": 302050872383242240,
@@ -43,7 +43,7 @@ BUMP_BOTS = {
     "1222548162741084311": {
         "name": "Discadia",
         "cmd_name": "bump",
-        "cmd_id": "1222548162741084312",
+        "cmd_id": None,
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful", "server has been bumped"],
         "bot_int_id": 1222548162741084311,
@@ -52,7 +52,7 @@ BUMP_BOTS = {
     "264811613708746752": {
         "name": "top.gg",
         "cmd_name": "bump",
-        "cmd_id": "264811613708746753",
+        "cmd_id": None,
         "cooldown_h": 12,
         "keywords": ["bumped", "bump", "voted"],
         "bot_int_id": 264811613708746752,
@@ -61,7 +61,7 @@ BUMP_BOTS = {
     "716948396455108649": {
         "name": "InfinityBots",
         "cmd_name": "bump",
-        "cmd_id": "716948396455108650",
+        "cmd_id": None,
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful"],
         "bot_int_id": 716948396455108649,
@@ -70,7 +70,7 @@ BUMP_BOTS = {
     "891226286347366410": {
         "name": "VoidBots",
         "cmd_name": "bump",
-        "cmd_id": "891226286347366411",
+        "cmd_id": None,
         "cooldown_h": 1,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 891226286347366410,
@@ -79,7 +79,7 @@ BUMP_BOTS = {
     "483344858939383808": {
         "name": "DiscordBotList",
         "cmd_name": "bump",
-        "cmd_id": "483344858939383809",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 483344858939383808,
@@ -88,7 +88,7 @@ BUMP_BOTS = {
     "387774921943678977": {
         "name": "Discord.bots.gg",
         "cmd_name": "bump",
-        "cmd_id": "387774921943678978",
+        "cmd_id": None,
         "cooldown_h": 6,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 387774921943678977,
@@ -97,7 +97,7 @@ BUMP_BOTS = {
     "1000744996328022076": {
         "name": "Discords.com",
         "cmd_name": "bump",
-        "cmd_id": "1000744996328022077",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1000744996328022076,
@@ -106,7 +106,7 @@ BUMP_BOTS = {
     "715652345503596595": {
         "name": "DiscordServices",
         "cmd_name": "bump",
-        "cmd_id": "715652345503596596",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 715652345503596595,
@@ -115,7 +115,7 @@ BUMP_BOTS = {
     "1049617674042007612": {
         "name": "Disforge",
         "cmd_name": "bump",
-        "cmd_id": "1049617674042007613",
+        "cmd_id": None,
         "cooldown_h": 4,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1049617674042007612,
@@ -124,7 +124,7 @@ BUMP_BOTS = {
     "1042166164868968458": {
         "name": "BotList.me",
         "cmd_name": "bump",
-        "cmd_id": "1042166164868968459",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1042166164868968458,
@@ -133,7 +133,7 @@ BUMP_BOTS = {
     "507937324942917634": {
         "name": "DiscordCenter",
         "cmd_name": "bump",
-        "cmd_id": "507937324942917635",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 507937324942917634,
@@ -142,7 +142,7 @@ BUMP_BOTS = {
     "846471508198170624": {
         "name": "Discordlist.gg",
         "cmd_name": "bump",
-        "cmd_id": "846471508198170625",
+        "cmd_id": None,
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 846471508198170624,
@@ -296,8 +296,13 @@ async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
         async with session.post(url, json=payload, headers=headers) as resp:
             status = resp.status
             text = await resp.text()
-            print(f"[SlashBump] {BUMP_BOTS[app_id]['name']} -> HTTP {status}")
-            return status in (200, 204)
+            if status in (200, 204):
+                print(f"[SlashBump] ✅ {BUMP_BOTS[app_id]['name']} -> HTTP {status} SUCCESS")
+                return True
+            else:
+                print(f"[SlashBump] ❌ {BUMP_BOTS[app_id]['name']} -> HTTP {status} FAILED")
+                print(f"[SlashBump] Response: {text[:300]}")
+                return False
 
 
 async def do_text_bump(channel: discord.TextChannel, command: str):
