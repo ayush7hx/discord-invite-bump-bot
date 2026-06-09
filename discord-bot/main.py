@@ -176,32 +176,58 @@ def make_session_id():
 #  STEP 1: Guild ke saare slash commands fetch karo
 #  Yahan se pata chalega kaunse bump bots installed hain
 # ─────────────────────────────────────────────
+SUPER_PROPS = "eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiQ2hyb21lIiwiZGV2aWNlIjoiIiwic3lzdGVtX2xvY2FsZSI6ImVuLVVTIiwiaGFzX2NsaWVudF9tb2RzIjpmYWxzZSwiYnJvd3Nlcl91c2VyX2FnZW50IjoiTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyMC4wLjAuMCBTYWZhcmkvNTM3LjM2IiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTIwLjAuMC4wIiwib3NfdmVyc2lvbiI6IjEwIiwicmVmZXJyZXIiOiIiLCJyZWZlcnJpbmdfZG9tYWluIjoiIiwicmVmZXJyZXJfY3VycmVudCI6IiIsInJlZmVycmluZ19kb21haW5fY3VycmVudCI6IiIsInJlbGVhc2VfY2hhbm5lbCI6InN0YWJsZSIsImNsaWVudF9idWlsZF9udW1iZXIiOjI2MDgxNCwiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbH0="
+
+
+def get_user_token():
+    """USER_TOKEN fetch karo, quotes aur spaces remove karke."""
+    token = os.getenv('USER_TOKEN', '').strip().strip('"').strip("'")
+    return token if token else None
+
+
+def get_browser_headers(token: str) -> dict:
+    return {
+        "Authorization": token,
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "X-Discord-Locale": "en-US",
+        "X-Discord-Timezone": "Asia/Kolkata",
+        "X-Super-Properties": SUPER_PROPS,
+        "Origin": "https://discord.com",
+        "Referer": "https://discord.com/channels/@me",
+    }
+
+
 async def fetch_cmd_id_from_api(guild_id: int, app_id: str, cmd_name: str) -> str | None:
     """
     Discord API se dynamically bump command ID fetch karo (user token se).
-    Ye tab use hota hai jab cmd_id hardcoded nahi hai (jaise Carl-bot).
     """
-    user_token = os.getenv('USER_TOKEN')
+    user_token = get_user_token()
     if not user_token:
+        print(f"[CmdFetch] ❌ USER_TOKEN not set!")
         return None
     url = f"https://discord.com/api/v9/guilds/{guild_id}/application-command-index"
-    headers = {
-        "Authorization": user_token,
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    }
+    headers = get_browser_headers(user_token)
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as resp:
                 if resp.status != 200:
-                    print(f"[CmdFetch] ❌ API returned {resp.status}")
+                    text = await resp.text()
+                    print(f"[CmdFetch] ❌ API returned {resp.status}: {text[:200]}")
                     return None
                 data = await resp.json()
-                for cmd in data.get("application_commands", []):
+                # Try multiple possible keys in response
+                all_cmds = (
+                    data.get("application_commands", [])
+                    or data.get("commands", [])
+                    or []
+                )
+                for cmd in all_cmds:
                     if (str(cmd.get("application_id")) == app_id
                             and cmd.get("name") == cmd_name):
-                        print(f"[CmdFetch] ✅ Found cmd_id={cmd['id']} for app {app_id} ({cmd_name})")
-                        return cmd["id"]
+                        print(f"[CmdFetch] ✅ Found cmd_id={cmd['id']} for {app_id} ({cmd_name})")
+                        return str(cmd["id"])
+                print(f"[CmdFetch] ⚠️ app_id={app_id} cmd={cmd_name} not found in {len(all_cmds)} commands")
     except Exception as e:
         print(f"[CmdFetch] ❌ Error: {e}")
     return None
@@ -243,13 +269,12 @@ async def fetch_guild_bump_commands(guild: discord.Guild):
 # ─────────────────────────────────────────────
 async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
                               app_id: str, cmd_info: dict) -> bool:
-    # USER_TOKEN zaruri hai slash commands trigger karne ke liye
-    user_token = os.getenv('USER_TOKEN')
+    user_token = get_user_token()
     if not user_token:
-        print(f"[SlashBump] ❌ USER_TOKEN not set! Cannot trigger slash commands.")
+        print(f"[SlashBump] ❌ USER_TOKEN not set!")
         return False
 
-    url = "https://discord.com/api/v10/interactions"
+    url = "https://discord.com/api/v9/interactions"
     cmd_id = cmd_info["cmd_id"]
     cmd_version = cmd_info["cmd_version"]
     cmd_name = cmd_info["cmd_name"]
@@ -284,13 +309,7 @@ async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
         "nonce": make_nonce()
     }
 
-    headers = {
-        "Authorization": user_token,  # User token (no "Bot " prefix)
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "X-Discord-Locale": "en-US",
-        "X-Discord-Timezone": "Asia/Kolkata",
-    }
+    headers = get_browser_headers(user_token)
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=payload, headers=headers) as resp:
@@ -301,7 +320,7 @@ async def trigger_slash_bump(guild: discord.Guild, channel: discord.TextChannel,
                 return True
             else:
                 print(f"[SlashBump] ❌ {BUMP_BOTS[app_id]['name']} -> HTTP {status} FAILED")
-                print(f"[SlashBump] Response: {text[:300]}")
+                print(f"[SlashBump] Response: {text[:400]}")
                 return False
 
 
@@ -436,6 +455,13 @@ async def on_message(message):
 async def on_ready():
     print(f'✅ {bot.user} is now online!')
 
+    # USER_TOKEN check
+    ut = get_user_token()
+    if ut:
+        print(f'🔑 USER_TOKEN is SET (starts with: {ut[:10]}...)')
+    else:
+        print(f'❌ USER_TOKEN is NOT SET — bumps will fail!')
+
     await bot.change_presence(
         status=discord.Status.idle,
         activity=discord.Activity(
@@ -451,6 +477,11 @@ async def on_ready():
             print(f'Cached {len(invites)} invites for: {guild.name}')
         except Exception as e:
             print(f'Could not cache invites for {guild.name}: {e}')
+
+        # Startup pe bump commands cache karo
+        print(f'[Startup] Fetching bump commands for {guild.name}...')
+        guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild)
+        print(f'[Startup] Found {len(guild_cmd_cache[guild.id])} bump bot(s) in {guild.name}')
 
     auto_bump_task.start()
     print('🔄 Auto bump task started!')
