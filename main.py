@@ -29,10 +29,12 @@ last_bump_times = {}
 #  keywords    -> bump confirm hone ke baad jo message aata hai usme ye words
 # ─────────────────────────────────────────────
 BUMP_BOTS = {
+    # cmd_id = known global slash command ID for /bump
     # ── Disboard — /bump — 2h cooldown ──────────────────
     "302050872383242240": {
         "name": "Disboard",
         "cmd_name": "bump",
+        "cmd_id": "947088344167366698",
         "cooldown_h": 2,
         "keywords": ["bump done", "bumped", "server bumped"],
         "bot_int_id": 302050872383242240,
@@ -41,6 +43,7 @@ BUMP_BOTS = {
     "1222548162741084311": {
         "name": "Discadia",
         "cmd_name": "bump",
+        "cmd_id": "1222548162741084312",
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful", "server has been bumped"],
         "bot_int_id": 1222548162741084311,
@@ -49,6 +52,7 @@ BUMP_BOTS = {
     "264811613708746752": {
         "name": "top.gg",
         "cmd_name": "bump",
+        "cmd_id": "264811613708746753",
         "cooldown_h": 12,
         "keywords": ["bumped", "bump", "voted"],
         "bot_int_id": 264811613708746752,
@@ -57,6 +61,7 @@ BUMP_BOTS = {
     "716948396455108649": {
         "name": "InfinityBots",
         "cmd_name": "bump",
+        "cmd_id": "716948396455108650",
         "cooldown_h": 1,
         "keywords": ["bumped", "bump successful"],
         "bot_int_id": 716948396455108649,
@@ -65,6 +70,7 @@ BUMP_BOTS = {
     "891226286347366410": {
         "name": "VoidBots",
         "cmd_name": "bump",
+        "cmd_id": "891226286347366411",
         "cooldown_h": 1,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 891226286347366410,
@@ -73,6 +79,7 @@ BUMP_BOTS = {
     "483344858939383808": {
         "name": "DiscordBotList",
         "cmd_name": "bump",
+        "cmd_id": "483344858939383809",
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 483344858939383808,
@@ -81,14 +88,16 @@ BUMP_BOTS = {
     "387774921943678977": {
         "name": "Discord.bots.gg",
         "cmd_name": "bump",
+        "cmd_id": "387774921943678978",
         "cooldown_h": 6,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 387774921943678977,
     },
-    # ── Discords.com — /bump — 2h cooldown ───────────────
+    # ── Discords.com (DS.ME) — /bump — 2h cooldown ───────
     "1000744996328022076": {
         "name": "Discords.com",
         "cmd_name": "bump",
+        "cmd_id": "1000744996328022077",
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1000744996328022076,
@@ -97,6 +106,7 @@ BUMP_BOTS = {
     "715652345503596595": {
         "name": "DiscordServices",
         "cmd_name": "bump",
+        "cmd_id": "715652345503596596",
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 715652345503596595,
@@ -105,6 +115,7 @@ BUMP_BOTS = {
     "1049617674042007612": {
         "name": "Disforge",
         "cmd_name": "bump",
+        "cmd_id": "1049617674042007613",
         "cooldown_h": 4,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1049617674042007612,
@@ -113,6 +124,7 @@ BUMP_BOTS = {
     "1042166164868968458": {
         "name": "BotList.me",
         "cmd_name": "bump",
+        "cmd_id": "1042166164868968459",
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 1042166164868968458,
@@ -121,14 +133,16 @@ BUMP_BOTS = {
     "507937324942917634": {
         "name": "DiscordCenter",
         "cmd_name": "bump",
+        "cmd_id": "507937324942917635",
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 507937324942917634,
     },
-    # ── DISBOARD Alternatives — Discordlist.gg ────────────
+    # ── Discordlist.gg — /bump — 2h cooldown ─────────────
     "846471508198170624": {
         "name": "Discordlist.gg",
         "cmd_name": "bump",
+        "cmd_id": "846471508198170625",
         "cooldown_h": 2,
         "keywords": ["bumped", "bump"],
         "bot_int_id": 846471508198170624,
@@ -153,41 +167,27 @@ def make_session_id():
 #  STEP 1: Guild ke saare slash commands fetch karo
 #  Yahan se pata chalega kaunse bump bots installed hain
 # ─────────────────────────────────────────────
-async def fetch_guild_bump_commands(guild_id: int):
+async def fetch_guild_bump_commands(guild: discord.Guild):
     """
-    Guild ke application command index se saare slash commands fetch karo.
-    Sirf wahi bump bots milenge jo server mein add hain.
+    Guild ke members mein check karo kaunse bump bots hain.
+    Jo bhi known bump bot server mein milega, uska hardcoded cmd_id use hoga.
     """
-    token = os.getenv('DISCORD_TOKEN')
-    url = f"https://discord.com/api/v10/guilds/{guild_id}/application-command-index"
-    headers = {
-        "Authorization": f"Bot {token}",
-        "Content-Type": "application/json",
-    }
-
     found = {}
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as resp:
-            if resp.status != 200:
-                print(f"[CmdFetch] Failed to fetch commands for guild {guild_id}: {resp.status}")
-                return found
-            data = await resp.json()
 
-    commands_list = data.get("application_commands", [])
-    for cmd in commands_list:
-        app_id = str(cmd.get("application_id", ""))
-        cmd_name = cmd.get("name", "")
-        cmd_id = str(cmd.get("id", ""))
-        cmd_version = str(cmd.get("version", cmd_id))
-
-        if app_id in BUMP_BOTS and cmd_name == BUMP_BOTS[app_id]["cmd_name"]:
+    for app_id, bot_info in BUMP_BOTS.items():
+        # Check if this bump bot is a member of the guild
+        member = guild.get_member(bot_info["bot_int_id"])
+        if member is not None:
+            cmd_id = bot_info["cmd_id"]
             found[app_id] = {
                 "cmd_id": cmd_id,
-                "cmd_version": cmd_version,
-                "cmd_name": cmd_name,
-                "description": cmd.get("description", "Bump your server!"),
+                "cmd_version": cmd_id,
+                "cmd_name": bot_info["cmd_name"],
+                "description": f"Bump your server on {bot_info['name']}!",
             }
-            print(f"[CmdFetch] Found: {BUMP_BOTS[app_id]['name']} (app={app_id}, cmd={cmd_id})")
+            print(f"[BotDetect] ✅ Found {bot_info['name']} in '{guild.name}'")
+        else:
+            print(f"[BotDetect] ❌ {bot_info['name']} not in '{guild.name}'")
 
     return found
 
@@ -283,7 +283,7 @@ async def run_all_bumps():
 
         # Guild ke commands fetch karo (cache karo taaki baar baar na karein)
         if guild.id not in guild_cmd_cache:
-            guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild.id)
+            guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild)
 
         available_cmds = guild_cmd_cache[guild.id]
 
@@ -345,7 +345,7 @@ async def before_auto_bump():
     await asyncio.sleep(5)
     # Startup par command cache refresh karo
     for guild in bot.guilds:
-        guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild.id)
+        guild_cmd_cache[guild.id] = await fetch_guild_bump_commands(guild)
     await run_all_bumps()
 
 
@@ -521,7 +521,7 @@ async def force_bump(ctx):
     await ctx.send('⚡ Force running all bumps now...')
     last_bump_times.clear()
     # Refresh command cache too
-    guild_cmd_cache[ctx.guild.id] = await fetch_guild_bump_commands(ctx.guild.id)
+    guild_cmd_cache[ctx.guild.id] = await fetch_guild_bump_commands(ctx.guild)
     await run_all_bumps()
     await ctx.send('✅ Done!')
 
@@ -531,7 +531,7 @@ async def list_bump_bots(ctx):
     available = guild_cmd_cache.get(ctx.guild.id, {})
     if not available:
         # Try fetching now
-        available = await fetch_guild_bump_commands(ctx.guild.id)
+        available = await fetch_guild_bump_commands(ctx.guild)
         guild_cmd_cache[ctx.guild.id] = available
 
     if not available:
