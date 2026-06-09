@@ -235,6 +235,16 @@ async def on_message(message):
 @bot.event
 async def on_ready():
     print(f'✅ {bot.user} is now online!')
+
+    # Set bot status to Idle (moon 🌙)
+    await bot.change_presence(
+        status=discord.Status.idle,
+        activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name="the server 🌙"
+        )
+    )
+
     for guild in bot.guilds:
         try:
             invites = await guild.fetch_invites()
